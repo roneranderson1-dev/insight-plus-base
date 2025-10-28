@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="8 ferramentas gratuitas de autoconhecimento e desenvolvimento pessoal. Descubra mais sobre você mesmo!">
+  <meta name="theme-color" content="#9333ea">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Insight+">
+  
+  <title>Insight+ | Ferramentas de Autoconhecimento</title>
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json">
+  
+  <!-- Icons -->
+  <link rel="icon" type="image/svg+xml" href="/icon.svg">
+  <link rel="apple-touch-icon" href="/icon-192.png">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- React e ReactDOM -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  
+  <!-- Babel Standalone para JSX -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+        sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    
+    /* Loading spinner */
+    .loading-spinner {
+      display: inline-block;
+      width: 50px;
+      height: 50px;
+      border: 5px solid rgba(147, 51, 234, 0.3);
+      border-radius: 50%;
+      border-top-color: rgb(147, 51, 234);
+      animation: spin 1s ease-in-out infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* PWA Install Prompt */
+    .install-prompt {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, rgb(147, 51, 234), rgb(59, 130, 246));
+      color: white;
+      padding: 15px 25px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      display: none;
+      align-items: center;
+      gap: 15px;
+      z-index: 9999;
+      animation: slideUp 0.3s ease-out;
+    }
+    
+    @keyframes slideUp {
+      from {
+        transform: translateX(-50%) translateY(100px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+      }
+    }
+    
+    .install-prompt.show {
+      display: flex;
+    }
+    
+    .install-prompt button {
+      background: white;
+      color: rgb(147, 51, 234);
+      border: none;
+      padding: 8px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .install-prompt button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    
+    .install-prompt .close-btn {
+      background: transparent;
+      color: white;
+      padding: 5px 10px;
+      margin-left: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <div style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column; gap: 20px;">
+      <div class="loading-spinner"></div>
+      <p style="color: #64748b;">Carregando Insight+...</p>
+    </div>
+  </div>
+  
+  <!-- PWA Install Prompt -->
+  <div id="install-prompt" class="install-prompt">
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+      <polyline points="7 10 12 15 17 10"></polyline>
+      <line x1="12" y1="15" x2="12" y2="3"></line>
+    </svg>
+    <div>
+      <strong>Instalar Insight+</strong>
+      <p style="font-size: 14px; opacity: 0.9;">Adicione à sua tela inicial para acesso rápido</p>
+    </div>
+    <button id="install-btn">Instalar</button>
+    <button class="close-btn" id="close-install">✕</button>
+  </div>
+
+  <!-- Carregar o app React -->
+  <script type="text/babel" src="insight-plus-app.jsx"></script>
+  
+  <script type="text/babel">
+    const { createElement } = React;
+    const { createRoot } = ReactDOM;
+    
+    // Renderizar o app
+    const root = createRoot(document.getElementById('root'));
+    root.render(createElement(InsightPlusApp));
+  </script>
+  
+  <!-- PWA Installation Script -->
+  <script>
+    let deferredPrompt;
+    const installPrompt = document.getElementById('install-prompt');
+    const installBtn = document.getElementById('install-btn');
+    const closeBtn = document.getElementById('close-install');
+    
+    // Detectar se o app pode ser instalado
+    window.addEventListener('beforeinstallprompt', (e) => {
+      // Previne o prompt automático do navegador
+      e.preventDefault();
+      deferredPrompt = e;
+      
+      // Mostra o prompt customizado após 3 segundos
+      setTimeout(() => {
+        if (!window.matchMedia('(display-mode: standalone)').matches) {
+          installPrompt.classList.add('show');
+        }
+      }, 3000);
+    });
+    
+    // Quando clicar em instalar
+    installBtn.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      
+      console.log(`Usuário ${outcome === 'accepted' ? 'aceitou' : 'recusou'} a instalação`);
+      
+      deferredPrompt = null;
+      installPrompt.classList.remove('show');
+    });
+    
+    // Fechar o prompt
+    closeBtn.addEventListener('click', () => {
+      installPrompt.classList.remove('show');
+      localStorage.setItem('install-prompt-dismissed', 'true');
+    });
+    
+    // Verificar se já está instalado
+    window.addEventListener('appinstalled', () => {
+      console.log('Insight+ foi instalado!');
+      installPrompt.classList.remove('show');
+    });
+    
+    // Registrar Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(registration => {
+            console.log('Service Worker registrado com sucesso:', registration.scope);
+          })
+          .catch(err => {
+            console.log('Falha ao registrar Service Worker:', err);
+          });
+      });
+    }
+    
+    // Analytics e tracking (opcional)
+    window.addEventListener('DOMContentLoaded', () => {
+      // Rastrear se está rodando como PWA
+      const isPWA = window.matchMedia('(display-mode: standalone)').matches;
+      console.log('Rodando como PWA:', isPWA);
+      
+      // Rastrear eventos importantes
+      if (isPWA) {
+        console.log('App aberto em modo standalone');
+        // Aqui você pode enviar para Google Analytics, Facebook Pixel, etc.
+      }
+    });
+  </script>
+</body>
+</html>
